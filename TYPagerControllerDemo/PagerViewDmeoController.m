@@ -37,6 +37,9 @@
 - (void)addPagerTabBar {
     TYTabPagerBar *tabBar = [[TYTabPagerBar alloc]init];
     tabBar.layout.barStyle = TYPagerBarStyleProgressElasticView;
+    //支持粗体变化, 没被选中时的字体是缩小状态的,不是预期的字体大小,可以适当调节大小以满足需求
+    tabBar.layout.selectedTextFont = [UIFont boldSystemFontOfSize:30];
+    tabBar.layout.normalTextFont = [UIFont systemFontOfSize:24];
     tabBar.dataSource = self;
     tabBar.delegate = self;
     [tabBar registerClass:[TYTabPagerBarCell class] forCellWithReuseIdentifier:[TYTabPagerBarCell cellIdentifier]];

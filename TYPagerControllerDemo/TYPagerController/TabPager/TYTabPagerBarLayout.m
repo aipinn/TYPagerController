@@ -196,19 +196,20 @@
 
 #pragma mark - cell
 
+//点击切换进行转场
 - (void)transitionFromCell:(UICollectionViewCell<TYTabPagerBarCellProtocol> *)fromCell toCell:(UICollectionViewCell<TYTabPagerBarCellProtocol> *)toCell animate:(BOOL)animate {
     if (_pagerTabBar.countOfItems == 0) {
         return;
     }
-    void (^animateBlock)() = ^{
+    void (^animateBlock)(void) = ^{
         if (fromCell) {
-            fromCell.titleLabel.font = _normalTextFont;
-            fromCell.titleLabel.textColor = _normalTextColor;
-            fromCell.transform = CGAffineTransformMakeScale(_selectFontScale, _selectFontScale);
+            fromCell.titleLabel.font = self->_normalTextFont;
+            fromCell.titleLabel.textColor = self->_normalTextColor;
+            fromCell.transform = CGAffineTransformMakeScale(self->_selectFontScale, self->_selectFontScale);
         }
         if (toCell) {
-            toCell.titleLabel.font = _normalTextFont;
-            toCell.titleLabel.textColor = _selectedTextColor ? _selectedTextColor : _normalTextColor;
+            toCell.titleLabel.font = self->_selectedTextFont;
+            toCell.titleLabel.textColor = self->_selectedTextColor ? self->_selectedTextColor : self->_normalTextColor;
             toCell.transform = CGAffineTransformIdentity;
         }
     };
@@ -221,7 +222,7 @@
     }
     
 }
-
+//滑动切换转场
 - (void)transitionFromCell:(UICollectionViewCell<TYTabPagerBarCellProtocol> *)fromCell toCell:(UICollectionViewCell<TYTabPagerBarCellProtocol> *)toCell progress:(CGFloat)progress {
     if (_pagerTabBar.countOfItems == 0 || !_textColorProgressEnable) {
         return;
@@ -229,6 +230,20 @@
     CGFloat currentTransform = (1.0 - _selectFontScale)*progress;
     fromCell.transform = CGAffineTransformMakeScale(1.0-currentTransform, 1.0-currentTransform);
     toCell.transform = CGAffineTransformMakeScale(_selectFontScale+currentTransform, _selectFontScale+currentTransform);
+    CGFloat diff = self.selectedTextFont.pointSize-self.normalTextFont.pointSize;
+    CGFloat fromSize = self.selectedTextFont.pointSize - (diff?:0)*progress;
+    CGFloat toSize = self.normalTextFont.pointSize + (diff?:0)*progress;
+    //NSLog(@"-progress:%f fromSize:%f toSize:%f", progress, fromSize, toSize);
+    
+    CGFloat fromWei = 0, toWei = 0;
+    if (self.selectedTextFont.fontDescriptor.symbolicTraits == UIFontDescriptorTraitBold ||
+        self.normalTextFont.fontDescriptor.symbolicTraits == UIFontDescriptorTraitBold)
+    {
+        fromWei = 1-progress;
+        toWei = progress;
+    }
+    fromCell.titleLabel.font = [UIFont systemFontOfSize:fromSize weight:fromWei];
+    toCell.titleLabel.font = [UIFont systemFontOfSize:toSize weight:toWei];
     
     if (_normalTextColor == _selectedTextColor || !_selectedTextColor) {
         return;
@@ -242,6 +257,7 @@
     
     fromCell.titleLabel.textColor = [UIColor colorWithRed:selR+detalR*progress green:selG+detalG*progress blue:selB+detalB*progress alpha:selA+detalA*progress];
     toCell.titleLabel.textColor = [UIColor colorWithRed:narR-detalR*progress green:narG-detalG*progress blue:narB-detalB*progress alpha:narA-detalA*progress];
+    
 }
 
 #pragma mark - progress View
